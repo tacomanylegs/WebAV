@@ -110,7 +110,10 @@ function parseAudioInfoFromESDSBox(esds: ESDSBoxParser): {
   codec += '.' + decConfDesc.oti.toString(16);
 
   const decSpecInfo = decConfDesc.descs[0];
-  if (decSpecInfo == null) return { codec };
+  if (decSpecInfo == null) {
+    if (codec.endsWith('40')) codec += '.2';
+    return { codec };
+  }
 
   // ref: https://wiki.multimedia.cx/index.php/MPEG-4_Audio#Audio_Specific_Config
   const audioObjectType = (decSpecInfo.data[0] & 0xf8) >> 3;

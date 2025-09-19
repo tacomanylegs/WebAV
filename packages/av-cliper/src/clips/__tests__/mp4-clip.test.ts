@@ -191,3 +191,14 @@ test('decode incorrectFrameTypeMp4', async () => {
   const { state } = await clip.tick(clip.meta.duration - 30e3);
   expect(state).toBe('success');
 });
+
+const mp4_webav1 = `//${location.host}/video/webav1.mp4`;
+test('compatible with incomplete audio codec string mp4a.40', async () => {
+  const clip = new MP4Clip((await fetch(mp4_webav1)).body!);
+  await clip.ready;
+  const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+  await clip.tick(1e6);
+  expect(spy).not.toHaveBeenCalled();
+  spy.mockRestore();
+});
