@@ -1,5 +1,13 @@
 # @webav/av-cliper
 
+## 1.2.4
+
+### Patch Changes
+
+- 4746e46: feat: when subtitles are too long, they automatically wrap.
+- 4746e46: fix: compatible with incomplete audio codec string mp4a.40
+  - @webav/internal-utils@1.2.4
+
 ## 1.2.3
 
 ### Patch Changes
