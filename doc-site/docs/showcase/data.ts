@@ -2,6 +2,13 @@ export default {
   tips: '使用了 WebAV 的项目可创建 Issue 投稿推荐自己的作品，开源项目免费，商业产品请<a href="https://fenghen.me/posts/2025/04/11/business-cooperation/" target="_blank">联系作者</a>详聊赞助费。',
   list: [
     {
+      name: 'ZingAI.video',
+      cover:
+        'https://github.com/WebAV-Tech/WebAV/blob/main/doc-site/public/img/zingai.video.jpg?raw=true',
+      description: '在线 AI 口播视频剪辑产品，简单、便捷、高效',
+      link: 'https://zingai.video',
+    },
+    {
       name: 'WebAV Pro',
       cover:
         'https://github.com/WebAV-Tech/WebAV-Pro/blob/main/assets/preview.png?raw=true',
