@@ -83,6 +83,10 @@ export class AVCanvas {
   on = this.#evtTool.on;
 
   #opts;
+  /**
+   * 预览帧生成中
+   */
+  #waitingPreviewFrame = false;
 
   /**
    * 创建 `AVCanvas` 类的实例。
@@ -145,6 +149,9 @@ export class AVCanvas {
       if ((performance.now() - start) / (expectFrameTime * runCnt) < 1) {
         return;
       }
+      // 如果正在准备下一次预览画面，则暂时跳过渲染；避免多个素材之间来回 seek 导致闪烁
+      if (this.#waitingPreviewFrame) return;
+
       runCnt += 1;
       this.#cvsCtx.fillStyle = opts.bgColor;
       this.#cvsCtx.fillRect(0, 0, this.#cvsEl.width, this.#cvsEl.height);
@@ -167,12 +174,10 @@ export class AVCanvas {
   }
 
   #pause() {
-    const emitPaused = this.#playState.step !== 0;
+    if (this.#playState.step === 0) return;
     this.#playState.step = 0;
-    if (emitPaused) {
-      this.#evtTool.emit('paused');
-      this.#audioCtx.suspend();
-    }
+    this.#evtTool.emit('paused');
+    this.#audioCtx.suspend();
     for (const asn of this.#playingAudioCache) {
       asn.stop();
       asn.disconnect();
@@ -307,18 +312,23 @@ export class AVCanvas {
    */
   async previewFrame(time: number) {
     this.#pause();
-    await Promise.all(
-      this.#spriteManager.getSprites({ time: false }).map((vs) => {
-        if (
-          time >= vs.time.offset &&
-          time <= vs.time.offset + vs.time.duration
-        ) {
-          return vs.preFrame(time - vs.time.offset);
-        }
-        return null;
-      }),
-    );
     this.#updateRenderTime(time);
+    this.#waitingPreviewFrame = true;
+    try {
+      await Promise.all(
+        this.#spriteManager.getSprites({ time: false }).map((vs) => {
+          if (
+            time >= vs.time.offset &&
+            time <= vs.time.offset + vs.time.duration
+          ) {
+            return vs.preFrame(time - vs.time.offset);
+          }
+          return null;
+        }),
+      );
+    } finally {
+      this.#waitingPreviewFrame = false;
+    }
   }
 
   /**
