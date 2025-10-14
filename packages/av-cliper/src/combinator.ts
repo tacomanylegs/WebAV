@@ -1,7 +1,7 @@
-import { Log, EventTool, file2stream, recodemux } from '@webav/internal-utils';
-import { OffscreenSprite } from './sprite/offscreen-sprite';
+import { EventTool, file2stream, Log, recodemux } from '@webav/internal-utils';
 import { sleep } from './av-utils';
 import { DEFAULT_AUDIO_CONF } from './clips';
+import { OffscreenSprite } from './sprite/offscreen-sprite';
 
 export interface ICombinatorOpts {
   width?: number;
@@ -207,18 +207,20 @@ export class Combinator {
 
   /**
    * 输出视频文件二进制流
+   * @param opts.maxTime 允许输出视频的最大时长，超过时长的素材内容会被忽略
    */
-  output(): ReadableStream<Uint8Array> {
+  output(opts: { maxTime?: number } = {}): ReadableStream<Uint8Array> {
     if (this.#sprites.length === 0) throw Error('No sprite added');
 
     const mainSpr = this.#sprites.find((it) => it.main);
     // 最大时间，优先取 main sprite，不存在则取最大值
     const maxTime =
-      mainSpr != null
+      opts.maxTime ??
+      (mainSpr != null
         ? mainSpr.time.offset + mainSpr.time.duration
         : Math.max(
             ...this.#sprites.map((it) => it.time.offset + it.time.duration),
-          );
+          ));
     if (maxTime === Infinity) {
       throw Error(
         'Unable to determine the end time, please specify a main sprite, or limit the duration of ImgClip, AudioCli',
